@@ -1,0 +1,79 @@
+#Boston Housing Data
+
+#Import statements
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#Reading the Dataset
+dataset = pd.read_csv('housing.data', delim_whitespace=True, header=None)
+ColNames=['Crim', 'Zn','Indus','Chas','Nox','Rm','Age','Dis','Rad','Tax','PTRatio','B','LStat', 'Medv']
+dataset.columns = ColNames
+
+#Basic data observations
+dataset.describe()
+dataset.info()
+
+#Display functions
+sns.pairplot(dataset, size=1.5)
+plt.show()
+
+#calculating Co-efficients for all the variables
+dataset.corr()
+
+#drawing a heat map to find the highest correlation with dependant variable
+plt.figure(figsize=(16,10))
+sns.heatmap(dataset.corr(), annot=True)
+plt.show()
+
+#fitting a simple linear regression model
+#Splitting the data to features and output variable
+X = dataset.iloc[:,5].values.reshape(-1,1)
+y = dataset.iloc[:,-1].values.reshape(-1,1)
+
+#splitting the data to test and train
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/3)
+
+#We dont need to apply feature scaling as Linear Regression function takes care of it.
+
+#Fitting a linear regression model
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+#Predicting the results
+y_pred = regressor.predict(X_test)
+
+#Visualiting the results
+plt.scatter(X_train, y_train, color = 'red')
+plt.plot(X_train, regressor.predict(X_train), color = 'blue')
+plt.xlabel('RM')
+plt.ylabel('Median Price')
+plt.show()
+
+# Visualising the Test set results
+plt.scatter(X_test, y_test, color = 'red')
+plt.plot(X_train, regressor.predict(X_train), color = 'blue')
+plt.xlabel('RM')
+plt.ylabel('Median Price')
+plt.show()
+
+#results
+#Linear Regression is heavily impacted by outliers
+#it is missing taking in so many points, not a good model
+#Some outliers need to be removed to improve the prediction.
+#Robust Regression!
+#We can use Ransac package to exclude outliers. But one needs to know the domain very well.
+#Ransac excludes outliers based on the paramters, if error is more than a particualr number, we can say the model to exclude it
+
+regressor.coef_
+regressor.intercept_
+
+#Evaluating the Models performance.
+#R squared method
+from sklearn.metrics import r2_score
+r2_score(y_test, y_pred)
+#Bigger the R squared, better the performace of the model
+
